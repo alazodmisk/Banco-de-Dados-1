@@ -1,0 +1,109 @@
+CREATE TABLE cliente (
+  id_cliente INT PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  telefone VARCHAR(20) UNIQUE,
+  email VARCHAR(100) UNIQUE
+)
+
+CREATE TABLE veiculo (
+  placa INT PRIMARY KEY,
+  modelo VARCHAR(100) NOT NULL,
+  ano INT CHECK (ano > 0) NOT NULL,
+  quilometragem INT CHECK (quilometragem > 0) NOT NULL,
+  idCliente INT,
+
+  FOREIGN KEY (idCliente)
+    REFERENCES cliente(id_cliente)
+)
+
+CREATE TABLE peca(
+  codigo INT PRIMARY KEY,
+  fabricante VARCHAR(100),
+  descricao VARCHAR(100) NOT NULL,
+  valor_ref FLOAT CHECK (valor_ref >= 0)
+)
+
+CREATE TABLE pecas_utilizadas (
+  id_pecaUtilizada INT PRIMARY KEY,
+  qtd_utilizada INT NOT NULL CHECK (qtd_utilizada > 0),
+  valor_cobrado INT CHECK (valor_cobrado >= 0),
+  idPeca INT,
+
+  FOREIGN KEY (idPeca)
+    REFERENCES peca(codigo)
+)
+
+CREATE TABLE ordem_servico (
+  id_ordem INT PRIMARY KEY,
+  data_abertura DATE NOT NULL,
+  data_fechamento DATE NOT NULL,
+  status VARCHAR(50) NOT NULL,
+  idPecasUtilizadas INT,
+  idVeiculo INT
+)
+
+ALTER TABLE pecas_utilizadas
+RENAME COLUMN id_pecaUtilizada TO id_peca_utilizada
+
+ALTER TABLE ordem_servico
+RENAME COLUMN idPecasUtilizadas TO id_pecas_utilizadas
+
+ALTER TABLE ordem_servico
+RENAME COLUMN idVeiculo TO id_veiculo
+
+ALTER TABLE ordem_servico
+ADD CONSTRAINT id_pecas_utilizadas
+  FOREIGN KEY (id_pecas_utilizadas)
+  REFERENCES pecas_utilizadas(id_peca_utilizada)
+
+ALTER TABLE ordem_servico
+ADD CONSTRAINT id_veiculo
+  FOREIGN KEY (id_veiculo)
+  REFERENCES veiculo(placa)
+
+CREATE TABLE servico (
+  id INT PRIMARY KEY,
+  descricao VARCHAR(100),
+  valor_ref FLOAT CHECK (valor_ref > 0)
+)
+
+CREATE TABLE funcionario (
+  matricula INT PRIMARY KEY,
+  nome VARCHAR(150) NOT NULL,
+  data_adm DATE NOT NULL
+)
+
+CREATE TABLE atendente (
+  matricula INT PRIMARY KEY,
+  ramal INT,
+
+  FOREIGN KEY (matricula)
+   REFERENCES funcionario(matricula)
+)
+
+CREATE TABLE mecanico (
+  matricula INT PRIMARY KEY,
+  especialidade VARCHAR(100),
+
+  FOREIGN KEY (matricula)
+   REFERENCES funcionario(matricula)
+)
+
+ALTER TABLE servico
+RENAME COLUMN id TO id_servico
+
+CREATE TABLE servico_executado (
+  id INT PRIMARY KEY,
+  valor_cobrado FLOAT CHECK (valor_cobrado > 0),
+  observacoes VARCHAR(100),
+  id_ordem_servico INT,
+  id_servico INT,
+  id_mecanico INT,
+
+  FOREIGN KEY (id_ordem_servico)
+    REFERENCES ordem_servico(id_ordem),
+  FOREIGN KEY (id_servico)
+    REFERENCES servico(id_servico),
+  FOREIGN KEY (id_mecanico)
+    REFERENCES mecanico(matricula)
+)
