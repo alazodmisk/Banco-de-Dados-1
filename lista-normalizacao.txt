@@ -1,1 +1,12 @@
+1)
+a- O curso que o aluno está linkado se repete (id_curso e nome_curso)
+b- 
+c- Ou seria alterado em todo o banco de dados, ou haveria uma inconsistência de dados.
+d- 
+e- 
+f- 
 
+2)
+a- INSERT INTO funcionario_departamento (nome_funcionario, salario, id_departamento, nome_departamento, gerente_departamento)
+   VALUES(1250.00, 12, "carlos")
+   Perceba 
