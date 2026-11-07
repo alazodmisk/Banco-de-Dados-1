@@ -39,3 +39,24 @@ e- id_produto -> id_categoria -> nome_categoria
 f- Sim, pois categoria e produto deveriam ser tabelas diferentes
 
 4)
+a-  CPF e id_aluno
+b- id_aluno
+c- CPF
+d- nome e email
+e- Pois ele pode ser único e não se repetir, porém não ser escolhido como a chave primária
+f- 
+      	CREATE TABLE ALUNO (
+                id_aluno BIGINT PRIMARY KEY,
+                cpf VARCHAR(11) UNIQUE NOT NULL,
+                nome VARCHAR(100) NOT NULL,
+                email VARCHAR(150) UNIQUE
+            );
+
+5)
+a- Pois, para respeitar a 1FN os telefones deveriam ser representados individualmente
+b- telefones
+c- Criar uma tabela apenas para telefones em que cada linha é associado à apenas um cliente
+d- id_cliente e id_telefone(no caso de uma estrutura normalizada)
+e- id_cliente na tabela de telefones
+f- CLIENTE - 1 ----- N - Telefone
+g- 
