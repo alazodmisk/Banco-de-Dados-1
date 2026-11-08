@@ -374,10 +374,117 @@ $D-$ Pois a relação está na 1FN e não há dependências parciais
 
 $E-$ Pois existem dependências transitivas
 
-$F-$
+$F-$ Dividimos a tabela original em duas de modo que os dados de aluno dependam exclusivamente de id_aluno e os dados de curso exclusivamente de id_curso
+
+$G-$ 
+
+    - ALUNO (
+        id_aluno PK,
+        nome_aluno,
+        id_curso FK → CURSO
+    )
+
+    - CURSO (
+        id_curso PK,
+        nome_curso,
+        coordenador
+    )
+
+$H-$ PK: id_aluno, id_curso | FK: id_curso(em ALUNO)
+
+$I-$
+
+    CREATE TABLE CURSO (
+        id_curso INT PRIMARY KEY,
+        nome_curso VARCHAR(100) NOT NULL,
+        coordenador VARCHAR(100) NOT NULL
+    );
+
+    CREATE TABLE ALUNO (
+        id_aluno INT PRIMARY KEY,
+        nome_aluno VARCHAR(100) NOT NULL,
+        id_curso INT NOT NULL,
+
+        FOREIGN KEY (id_curso)
+            REFERENCES CURSO(id_curso)
+    );
+
+$J-$ 
+
+    INSERT INTO CURSO(id_curso, nome_curso, coordenador)
+    VALUES 
+        (10, 'sistemas da informação', 'Carlos'), 
+        (20, 'ciencia da computação', 'Fernanda'), 
+        (30, 'Engenharia de Software', 'Roberto')
+
+$K-$ 
+
+    INSERT INTO ALUNO (id_aluno, nome_aluno, id_curso)
+    VALUES
+        (1, 'João', 10),
+        (2, 'Maria', 10),
+        (3, 'Pedro', 20),
+        (4, 'Ana', 20),
+        (5, 'Lucas', 30);
+
+$L-$ 
+
+    UPDATE CURSO
+    SET coordenador = 'MARCOS'
+    WHERE id_curso = 10;
+
+$M-$
+
+    SELECT *
+    FROM CURSO
+    WHERE id_curso = 10;
+
+    | id_curso | nome_curso             | coordenador |
+    | -------- | ---------------------- | ----------- |
+    | 10       | sistemas da informação | MARCOS      |
+
+$N-$ Pois não dependência transitiva. Os atributos de curso dependem apenas de id_curso e id_curso não depende de ninguém de aluno
 
 ##### EXERCICIO 10)
+$A-$ id_funcionario -> {nome_funcionario, salario, id_departamento} | id_departamento -> {nome_departamento, gerente_departamento}
 
+$B-$ Sim, pois todos os valores são atômicos
+
+$C-$ Sim, pois não há dependências parciais
+
+$D-$ Não, pois há dependências transitivas
+
+$E-$ Anomalia de inserção: Impossível inserir um departamento sem inserir um funcionário novo | Anomalia de atualização: Se o gerente de um departamento mudar o nome, deveria mudar o nome desse mesmo gerente em diferentes linhas (funcionários) | Anomalia de exclusão: Se o último funcionário de um departamento for excluído, as informações do departamento também serão perdidas.
+
+$F-$
+
+    FUNCIONARIO(
+        id_funcionario (PK)
+        nome_funcionario
+        salario
+        id_departamento (FK) -> DEPARTAMENTO
+    )
+
+    DEPARTAMENTO(
+        id_departamento (PK)
+        nome_departamento
+        gerente_departamento
+    )
+
+$G-$
+
+- DEPARTAMENTO
+  - `id_departamento` INT (PK)
+  - `nome_departamento` VARCHAR(100)
+  - `gerente_departamento` VARCHAR(100)
+
+- FUNCIONARIO
+  - `id_funcionario` INT (PK)
+  - `nome_funcionario` VARCHAR(100)
+  - `salario` DECIMAL(10,2)
+  - `id_departamento` INT (FK) → DEPARTAMENTO(`id_departamento`)
+
+**Relacionamento:** DEPARTAMENTO (1) : (N) FUNCIONARIO.
 
 ##### EXERCICIO 11)
 
