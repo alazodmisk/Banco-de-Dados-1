@@ -487,9 +487,515 @@ $G-$
 **Relacionamento:** DEPARTAMENTO (1) : (N) FUNCIONARIO.
 
 ##### EXERCICIO 11)
+$A-$
 
+    CREATE TABLE PRODUTO_CATEGORIA (
+        id_produto INT PRIMARY KEY,
+        nome_produto VARCHAR(100) NOT NULL,
+        preco DECIMAL(10,2) NOT NULL,
+        id_categoria INT NOT NULL,
+        nome_categoria VARCHAR(100) NOT NULL
+    );
+
+$B-$ 
+
+    INSERT INTO PRODUTO_CATEGORIA
+    (id_produto, nome_produto, preco, id_categoria, nome_categoria)
+    VALUES
+    (1, 'Mouse', 59.90, 10, 'Periféricos'),
+    (2, 'Teclado', 129.90, 10, 'Periféricos'),
+    (3, 'Monitor', 899.90, 20, 'Monitores'),
+    (4, 'Webcam', 199.90, 10, 'Periféricos'),
+    (5, 'Monitor Gamer', 1299.90, 20, 'Monitores');
+
+$C-$
+
+    SELECT *
+    FROM PRODUTO_CATEGORIA;
+
+    | id_produto | nome_produto  | preco   | id_categoria | nome_categoria |
+    | ---------- | ------------- | ------- | ------------ | -------------- |
+    | 1          | Mouse         | 59.90   | 10           | Periféricos    |
+    | 2          | Teclado       | 129.90  | 10           | Periféricos    |
+    | 3          | Monitor       | 899.90  | 20           | Monitores      |
+    | 4          | Webcam        | 199.90  | 10           | Periféricos    |
+    | 5          | Monitor Gamer | 1299.90 | 20           | Monitores      |
+
+$D-$
+
+    UPDATE PRODUTO_CATEGORIA
+    SET nome_categoria = 'Acessórios'
+    WHERE id_produto = 1;
+
+$E-$
+
+    | id_produto | nome_produto  | preco   | id_categoria | nome_categoria |
+    | ---------- | ------------- | ------- | ------------ | -------------- |
+    | 2          | Teclado       | 129.90  | 10           | Periféricos    |
+    | 3          | Monitor       | 899.90  | 20           | Monitores      |
+    | 4          | Webcam        | 199.90  | 10           | Periféricos    |
+    | 5          | Monitor Gamer | 1299.90 | 20           | Monitores      |
+    | 1          | Mouse         | 59.90   | 10           | Acessórios     |
+
+$F-$ periférico -> Acessório mas a mudança ocorreu em apenas uma linha
+
+$G - até - K-$
+
+    CREATE TABLE CATEGORIA (
+        id_categoria INT PRIMARY KEY,
+        nome_categoria VARCHAR(100) NOT NULL
+    );
+
+    CREATE TABLE PRODUTO (
+        id_produto INT PRIMARY KEY,
+        nome_produto VARCHAR(100) NOT NULL,
+        preco DECIMAL(10,2) NOT NULL,
+        id_categoria INT NOT NULL,
+
+        FOREIGN KEY (id_categoria)
+            REFERENCES CATEGORIA(id_categoria)
+    );
+
+    Após a alteração de periféricos para acessórios
+    | id_categoria | nome_categoria |
+    | ------------ | -------------- |
+    | 20           | Monitores      |
+    | 10           | Acessórios     |
+
+    | id_produto | nome_produto  | preco   | id_categoria |
+    | ---------- | ------------- | ------- | ------------ |
+    | 1          | Mouse         | 59.90   | 10           |
+    | 2          | Teclado       | 129.90  | 10           |
+    | 3          | Monitor       | 899.90  | 20           |
+    | 4          | Webcam        | 199.90  | 10           |
+    | 5          | Monitor Gamer | 1299.90 | 20           |
+
+$L-$ A versão B reduz o risco de inconsistências porque os dados das categorias são armazenados separadamente dos dados dos produtos.
+
+$M-$ Na versão A, seria necessário alterar os três registros dos produtos pertencentes à categoria Periféricos, pois o nome da categoria está armazenado diretamente em cada produto. Já na versão B, seria necessário alterar apenas um registro na tabela CATEGORIA
 
 ##### EXERCICIO 12)
+$A-$ A tabela atende a 1FN e a 2FN, porém não atende a 3FN por possuir dependência transitiva
+
+$B-$ id_produto -> {nome_produto, preco, id_categoria} | id_categoria -> nome_categoria
+
+$C-$ 
+
+    PRODUTO(
+        id_produto (PK)
+        nome_produto
+        preco
+        id_categoria (FK) -> CATEGORIA
+    )    
+
+    CATEGORIA (
+        id_categoria (PK)
+        nome_categoria
+    )
+
+$D-$
+
+    CREATE TABLE categoria_normalizada (
+        id_categoria BIGINT PRIMARY KEY,
+        nome_categoria VARCHAR(100) NOT NULL
+    );
+
+    CREATE TABLE produto_normalizado (
+        id_produto BIGINT PRIMARY KEY,
+        nome_produto VARCHAR(100) NOT NULL,
+        preco NUMERIC(10,2) NOT NULL,
+        id_categoria BIGINT NOT NULL,
+
+        FOREIGN KEY (id_categoria)
+            REFERENCES categoria_normalizada(id_categoria)
+    );
+
+$E-$
+
+    INSERT INTO categoria_normalizada
+    (id_categoria, nome_categoria)
+    SELECT DISTINCT
+        id_categoria,
+        nome_categoria
+    FROM produto_original;
+
+$F-$
+
+    INSERT INTO produto_normalizado
+    (id_produto, nome_produto, preco, id_categoria)
+    SELECT
+        id_produto,
+        nome_produto,
+        preco,
+        id_categoria
+    FROM produto_original;
+
+$G-$
+
+    | id_categoria | nome_categoria |
+    | ------------ | -------------- |
+    | 10           | Informática    |
+    | 30           | Escritório     |
+    | 20           | Eletrônicos    |
+
+    | id_produto | nome_produto | preco   | id_categoria |
+    | ---------- | ------------ | ------- | ------------ |
+    | 1          | Notebook     | 3500.00 | 10           |
+    | 2          | Mouse        | 80.00   | 10           |
+    | 3          | Teclado      | 150.00  | 10           |
+    | 4          | Monitor      | 1200.00 | 20           |
+    | 5          | Webcam       | 180.00  | 20           |
+    | 6          | Impressora   | 900.00  | 30           |
+
+$H-$ Sim
+
+$I-$ O que acontece no item I é que o comando INSERT INTO categoria_normalizada SELECT DISTINCT seleciona apenas os pares distintos de identificador e nome de categoria.
+
+$J-$ Pois permite que um pedido seja associado à uma categoria de modo que você não precisa repetir a criação de uma mesma categoria diversas vezes, economizando espaço e facilitando a manutenção do banco de dados
 
 
 ##### EXERCICIO 13)
+$A-$ Identifique todos os atributos.
+
+```
+id_pedido
+id_produto
+data_pedido
+id_cliente
+nome_cliente
+telefone_cliente
+nome_produto
+preco_atual_produto
+quantidade
+preco_unitario_venda
+```
+
+$B-$ Identifique a chave primária.
+
+A chave primária é composta por:
+
+```
+(id_pedido, id_produto)
+```
+
+Ela identifica cada produto dentro de um pedido, garantindo que o mesmo produto não apareça mais de uma vez no mesmo pedido.
+
+$C-$ Identifique as dependências funcionais.
+
+```
+id_pedido -> {data_pedido, id_cliente}
+
+id_cliente -> {nome_cliente, telefone_cliente}
+
+id_produto -> {nome_produto, preco_atual_produto}
+
+(id_pedido, id_produto) -> {quantidade, preco_unitario_venda}
+```
+
+$D-$ Identifique as dependências parciais.
+
+```
+id_pedido -> {data_pedido, id_cliente}
+
+id_produto -> {nome_produto, preco_atual_produto}
+```
+
+Essas dependências são parciais porque os atributos dependem de apenas uma parte da chave primária composta (`id_pedido`, `id_produto`), e não da combinação completa.
+
+$E-$ Identifique as dependências transitivas.
+
+```
+id_pedido -> id_cliente -> {nome_cliente, telefone_cliente}
+```
+
+Existe uma dependência transitiva porque `nome_cliente` e `telefone_cliente` dependem de `id_cliente`, que por sua vez é determinado por `id_pedido`.
+
+$F-$ Explique por que a relação não está na 2FN.
+
+A relação não atende à 2FN porque possui uma chave primária composta e apresenta dependências funcionais parciais.
+
+Os atributos `data_pedido` e `id_cliente` dependem somente de `id_pedido`, enquanto `nome_produto` e `preco_atual_produto` dependem somente de `id_produto`. Portanto, esses atributos não dependem da chave primária completa.
+
+$G-$ Explique quais problemas impedem que a estrutura atenda à 3FN.
+
+A relação não atende à 3FN porque apresenta dependências transitivas. Os atributos `nome_cliente` e `telefone_cliente` dependem de `id_cliente`, que não é a chave primária da relação, mas sim um atributo determinado por `id_pedido`.
+
+Além disso, existem dependências parciais, que já impedem a relação de atender à 2FN.
+
+$H-$ Normalize a relação até a 1FN.
+
+A relação já atende à 1FN, pois todos os atributos possuem valores atômicos, sem listas ou grupos de valores repetidos.
+
+Portanto, não é necessária nenhuma alteração na estrutura para atingir essa forma normal.
+
+$I-$ Normalize a relação até a 2FN.
+
+Para atingir a 2FN, precisamos eliminar as dependências parciais, separando os atributos que dependem apenas de `id_pedido` e `id_produto`.
+
+```
+PEDIDO(
+    id_pedido (PK),
+    data_pedido,
+    id_cliente,
+    nome_cliente,
+    telefone_cliente
+)
+
+PRODUTO(
+    id_produto (PK),
+    nome_produto,
+    preco_atual_produto
+)
+
+ITEM_PEDIDO(
+    id_pedido (PK, FK) -> PEDIDO,
+    id_produto (PK, FK) -> PRODUTO,
+    quantidade,
+    preco_unitario_venda
+)
+```
+
+$J-$ Normalize a relação até a 3FN.
+
+Para atingir a 3FN, precisamos eliminar a dependência transitiva, separando os dados dos clientes dos dados dos pedidos.
+
+```
+CLIENTE(
+    id_cliente (PK),
+    nome_cliente,
+    telefone_cliente
+)
+
+PEDIDO(
+    id_pedido (PK),
+    data_pedido,
+    id_cliente (FK) -> CLIENTE
+)
+
+PRODUTO(
+    id_produto (PK),
+    nome_produto,
+    preco_atual_produto
+)
+
+ITEM_PEDIDO(
+    id_pedido (PK, FK) -> PEDIDO,
+    id_produto (PK, FK) -> PRODUTO,
+    quantidade,
+    preco_unitario_venda
+)
+```
+
+$K-$ Apresente o modelo lógico final.
+
+O modelo lógico resultante da normalização até a 3FN é composto por quatro relações:
+
+- `CLIENTE` (`id_cliente` PK, `nome_cliente`, `telefone_cliente`)
+- `PEDIDO` (`id_pedido` PK, `data_pedido`, `id_cliente` FK)
+- `PRODUTO` (`id_produto` PK, `nome_produto`, `preco_atual_produto`)
+- `ITEM_PEDIDO` (`id_pedido` PK/FK, `id_produto` PK/FK, `quantidade`, `preco_unitario_venda`)
+
+A chave primária de `ITEM_PEDIDO` é composta por (`id_pedido`, `id_produto`).
+
+$L-$ Identifique as chaves primárias.
+
+- `CLIENTE`: `id_cliente`.
+- `PEDIDO`: `id_pedido`.
+- `PRODUTO`: `id_produto`.
+- `ITEM_PEDIDO`: (`id_pedido`, `id_produto`).
+
+$M-$ Identifique as chaves estrangeiras.
+
+- `PEDIDO`: `id_cliente` referencia `CLIENTE(id_cliente)`.
+- `ITEM_PEDIDO`: `id_pedido` referencia `PEDIDO(id_pedido)`.
+- `ITEM_PEDIDO`: `id_produto` referencia `PRODUTO(id_produto)`.
+
+$N-$ Determine as cardinalidades dos relacionamentos.
+
+- `CLIENTE` (1) : (N) `PEDIDO`: um cliente pode realizar vários pedidos, mas cada pedido pertence a um único cliente.
+- `PEDIDO` (1) : (N) `ITEM_PEDIDO`: um pedido pode possuir vários itens, mas cada item pertence a um único pedido.
+- `PRODUTO` (1) : (N) `ITEM_PEDIDO`: um produto pode aparecer em vários itens de pedidos, mas cada item referencia um único produto.
+
+Consequentemente, `PEDIDO` e `PRODUTO` possuem um relacionamento N:N, intermediado por `ITEM_PEDIDO`.
+
+$O-$ Crie as tabelas normalizadas no Supabase.
+
+```
+CREATE TABLE CLIENTE (
+    id_cliente INT PRIMARY KEY,
+    nome_cliente VARCHAR(100) NOT NULL,
+    telefone_cliente VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE PRODUTO (
+    id_produto INT PRIMARY KEY,
+    nome_produto VARCHAR(100) NOT NULL,
+    preco_atual_produto NUMERIC(10,2) NOT NULL
+);
+
+CREATE TABLE PEDIDO (
+    id_pedido INT PRIMARY KEY,
+    data_pedido DATE NOT NULL,
+    id_cliente INT NOT NULL,
+
+    FOREIGN KEY (id_cliente)
+        REFERENCES CLIENTE(id_cliente)
+);
+
+CREATE TABLE ITEM_PEDIDO (
+    id_pedido INT NOT NULL,
+    id_produto INT NOT NULL,
+    quantidade INT NOT NULL,
+    preco_unitario_venda NUMERIC(10,2) NOT NULL,
+
+    PRIMARY KEY (id_pedido, id_produto),
+
+    FOREIGN KEY (id_pedido)
+        REFERENCES PEDIDO(id_pedido),
+
+    FOREIGN KEY (id_produto)
+        REFERENCES PRODUTO(id_produto)
+);
+```
+
+$P-$ Defina as restrições de integridade necessárias.
+
+As restrições utilizadas foram:
+
+- `PRIMARY KEY`: garante a identificação única dos registros.
+- `FOREIGN KEY`: garante que os relacionamentos referenciem registros existentes.
+- `NOT NULL`: impede que atributos obrigatórios recebam valores nulos.
+- `PRIMARY KEY (id_pedido, id_produto)`: impede que um produto seja registrado mais de uma vez no mesmo pedido.
+
+Também podemos utilizar `CHECK` para garantir que a quantidade e os preços sejam positivos:
+
+```
+ALTER TABLE ITEM_PEDIDO
+ADD CONSTRAINT chk_quantidade
+CHECK (quantidade > 0);
+
+ALTER TABLE ITEM_PEDIDO
+ADD CONSTRAINT chk_preco_venda
+CHECK (preco_unitario_venda >= 0);
+
+ALTER TABLE PRODUTO
+ADD CONSTRAINT chk_preco_atual
+CHECK (preco_atual_produto >= 0);
+```
+
+$Q-$ Cadastre três clientes.
+
+```
+INSERT INTO CLIENTE
+(id_cliente, nome_cliente, telefone_cliente)
+VALUES
+(1, 'João Silva', '44999990001'),
+(2, 'Maria Oliveira', '44999990002'),
+(3, 'Pedro Santos', '44999990003');
+```
+
+$R-$ Cadastre cinco produtos.
+
+```
+INSERT INTO PRODUTO
+(id_produto, nome_produto, preco_atual_produto)
+VALUES
+(10, 'Mouse', 59.90),
+(20, 'Teclado', 129.90),
+(30, 'Monitor', 899.90),
+(40, 'Webcam', 199.90),
+(50, 'Headset', 249.90);
+```
+
+$S-$ Cadastre quatro pedidos.
+
+```
+INSERT INTO PEDIDO
+(id_pedido, data_pedido, id_cliente)
+VALUES
+(1, '2026-10-01', 1),
+(2, '2026-10-02', 2),
+(3, '2026-10-03', 1),
+(4, '2026-10-04', 3);
+```
+
+$T-$ Cadastre pelo menos oito itens de pedido, respeitando a chave primária composta.
+
+```
+INSERT INTO ITEM_PEDIDO
+(id_pedido, id_produto, quantidade, preco_unitario_venda)
+VALUES
+(1, 10, 2, 59.90),
+(1, 20, 1, 129.90),
+(1, 30, 1, 899.90),
+(2, 10, 1, 55.90),
+(2, 40, 2, 199.90),
+(3, 20, 2, 119.90),
+(3, 50, 1, 249.90),
+(4, 30, 1, 879.90);
+```
+
+Observe que alguns preços unitários de venda são diferentes dos preços cadastrais atuais. Isso é proposital, pois representa possíveis descontos ou condições comerciais aplicadas no momento da venda.
+
+$U-$ Consulte todos os pedidos.
+
+```
+SELECT *
+FROM PEDIDO;
+```
+
+$V-$ Consulte os itens pertencentes a um pedido específico.
+
+Por exemplo, para consultar os itens do pedido de identificador 1:
+
+```
+SELECT *
+FROM ITEM_PEDIDO
+WHERE id_pedido = 1;
+```
+
+$W-$ Atualize o telefone de um cliente.
+
+Vamos alterar o telefone do cliente João Silva:
+
+```
+UPDATE CLIENTE
+SET telefone_cliente = '44988887777'
+WHERE id_cliente = 1;
+```
+
+$X-$ Atualize o preço cadastral de um produto.
+
+Vamos alterar o preço atual do Mouse:
+
+```
+UPDATE PRODUTO
+SET preco_atual_produto = 69.90
+WHERE id_produto = 10;
+```
+
+$Y-$ Verifique se a alteração do preço cadastral preservou o preço unitário registrado nos pedidos anteriores.
+
+Para verificar, podemos consultar o preço atual do produto e os preços registrados nos pedidos:
+
+```
+SELECT *
+FROM PRODUTO
+WHERE id_produto = 10;
+
+SELECT *
+FROM ITEM_PEDIDO
+WHERE id_produto = 10;
+```
+
+O resultado esperado é:
+
+| Tabela                 | Preço    |
+| ---------------------- | -------- |
+| PRODUTO (preço atual)  | R$ 69,90 |
+| ITEM_PEDIDO (pedido 1) | R$ 59,90 |
+| ITEM_PEDIDO (pedido 2) | R$ 55,90 |
+
+Assim, podemos verificar que a alteração do preço cadastral não modificou os valores históricos das vendas.
+
+$Z-$ A separação é importante porque permite armazenar o preço atual de cada produto independentemente do preço pelo qual ele foi vendido em determinado pedido. Isso evita inconsistências nos registros históricos e garante que seja possível consultar corretamente os valores cobrados em cada venda.
