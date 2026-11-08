@@ -239,7 +239,42 @@ $I-$
 
 ##### EXERCICIO 7)
 $A-$ (id_pedido, id_produto)
-$B-$  
+
+$B-$ (id_pedido, id_produto) -> quantidade
+
+$C-$ id_produto -> nome_produto
+
+$D-$ Pois a chave primária nesse caso é composta (id_pedido, id_produto) e nome_produto depende apenas de id_produto
+
+$E-$ A relação está na Primeira Forma Normal (1FN), pois todos os atributos possuem valores atômicos, ou seja, cada campo armazena apenas um valor, sem listas ou grupos de valores repetidos.
+
+$F-$ A relação não atende à Segunda Forma Normal (2FN), pois existe uma dependência funcional parcial.
+
+$G-$ Primeiro, separamos a tabela para eliminar a dependência fucional parcial (id_pedido, id_produto) -> quantidade de modo que tenhamos:
+
+    PRODUTO
+        id_produto (PK)
+        nome_produto
+
+    PEDITO
+        id_pedido
+
+    ITEM_PEDIDO
+        id_pedido (PK, FK)
+        id_produto (PK, FK)
+        quantidade
+
+$H-$ 
+
+    - PEDIDO (`id_pedido` PK)
+
+    - PRODUTO (`id_produto` PK, `nome_produto`)
+
+    - **ITEM_PEDIDO** (
+    `id_pedido` PK, FK → PEDIDO,
+    `id_produto` PK, FK → PRODUTO,
+    `quantidade`
+    )
 
 ##### EXERCICIO 8)
 
