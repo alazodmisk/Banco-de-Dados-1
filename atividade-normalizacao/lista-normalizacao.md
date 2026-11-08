@@ -275,12 +275,106 @@ $H-$
     `id_produto` PK, FK → PRODUTO,
     `quantidade`
     )
+    A chave primária de ITEM_PEDIDO é composta por (`id_pedido`, `id_produto`).
+
+$I-$ 
+
+    CREATE TABLE PEDIDO (
+        id_pedido INT PRIMARY KEY
+    );
+
+    CREATE TABLE PRODUTO (
+        id_produto INT PRIMARY KEY,
+        nome_produto VARCHAR(100) NOT NULL
+    );
+
+    CREATE TABLE ITEM_PEDIDO (
+        id_pedido INT NOT NULL,
+        id_produto INT NOT NULL,
+        quantidade INT NOT NULL,
+
+        PRIMARY KEY (id_pedido, id_produto),
+
+        FOREIGN KEY (id_pedido)
+            REFERENCES PEDIDO(id_pedido),
+
+        FOREIGN KEY (id_produto)
+            REFERENCES PRODUTO(id_produto)
+    );
+
+$J-$
+
+    PRIMARY KEY (id_pedido, id_produto)
+
+$K-$ 
+
+    FOREIGN KEY (id_pedido)
+        REFERENCES PEDIDO(id_pedido),
+
+    FOREIGN KEY (id_produto)
+        REFERENCES PRODUTO(id_produto)
+
+$L-$
+
+    INSERT INTO PEDIDO (id_pedido)
+    VALUES
+    (1),
+    (2),
+    (3);
+
+$M-$
+
+    INSERT INTO PRODUTO (id_produto, nome_produto)
+    VALUES
+    (10, 'Mouse'),
+    (20, 'Teclado');
+
+$N-$
+
+    INSERT INTO ITEM_PEDIDO
+    (id_pedido, id_produto, quantidade)
+    VALUES
+    (1, 10, 2),
+    (1, 20, 1),
+    (2, 10, 3),
+    (3, 10, 1);
+
+$O-$
+
+    INSERT INTO ITEM_PEDIDO
+    (id_pedido, id_produto, quantidade)
+    VALUES
+    (1, 10, 5);
+
+$P-$ A operação foi impedida pela restrição PRIMARY KEY composta da tabela ITEM_PEDIDO, formada pelos atributos id_pedido e id_produto.
 
 ##### EXERCICIO 8)
+$A-$ id_venda
 
+$B-$ Simples
 
+$C-$ Não, pois data_venda é dependente de id_venda e nome_cliente de id_cliente
+
+$D-$ Sim, pois a pois sua única chave candidata (id_venda) é simples
+
+$E-$ Sim, pois há uma dependência transitiva (id_venda -> id_cliente -> nome_cliente)
+
+$F-$ (id_venda -> id_cliente -> nome_cliente)
+
+$G-$ 3FN
+ 
 ##### EXERCICIO 9)
+$A-$ id_aluno
 
+$B-$ id_aluno -> nome_aluno | id_aluno -> id_curso | id_curso -> {nome_curso, coordenador}
+
+$C-$ id_aluno -> id_curso -> {nome_curso, coordenador}
+
+$D-$ Pois a relação está na 1FN e não há dependências parciais
+
+$E-$ Pois existem dependências transitivas
+
+$F-$
 
 ##### EXERCICIO 10)
 
